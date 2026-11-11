@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2: Securing IoT Devices | IoT Cybersecurity Fundamentals</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+h1 { color: #1a3c5e; }
+h2 { color: #2c5f7c; margin-top: 2rem; }
+nav { margin: 2rem 0; padding: 1rem; background: #f0f5f8; border-radius: 8px; }
+nav a { display: inline-block; margin-right: 1rem; padding: 0.5rem 1rem; background: #1a3c5e; color: white; text-decoration: none; border-radius: 4px; }
+nav a:hover { background: #2c5f7c; }
+.card { border: 1px solid #d0d8e0; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+.card h3 { margin-top: 0; color: #1a3c5e; }
+.socratic { background: #fff8e8; border-left: 4px solid #e8a838; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+.socratic p { margin: 0; font-weight: 500; }
+.defense { background: #e8f8e8; border-left: 4px solid #27ae60; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+.defense h4 { margin-top: 0; color: #27ae60; }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #d0d8e0; color: #666; font-size: 0.9rem; }
+code { background: #f0f5f8; padding: 0.2rem 0.4rem; border-radius: 4px; }
+pre { background: #1e2a38; color: #d0d8e0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid #d0d8e0; padding: 0.75rem; text-align: left; }
+th { background: #f0f5f8; }
+</style>
+</head>
+<body>
+<header>
+<h1>Lesson 2: Securing IoT Devices</h1>
+<p>Defense strategies: secure boot, OTA updates, network segmentation, and secure development</p>
+</header>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="lesson1.html">Lesson 1: Common Vulnerabilities</a>
+<a href="lesson2.html">Lesson 2: Securing Devices</a>
+<a href="quiz.html">Quiz</a>
+</nav>
+
+<main>
+<section class="card">
+<h2>Defense in Depth for IoT</h2>
+<p>No single control secures an IoT device. Effective security layers defenses across the device lifecycle: manufacturing → provisioning → operation → decommissioning.</p>
+
+<table>
+<thead>
+<tr><th>Layer</th><th>Controls</th><th>Threat Mitigated</th></tr>
+</thead>
+<tbody>
+<tr><td>Hardware</td><td>Secure element, tamper detection, JTAG disable, encrypted flash</td><td>Physical extraction, cloning, side-channel</td></tr>
+<tr><td>Boot</td><td>Secure boot, measured boot, root of trust</td><td>Firmware replacement, rootkits, rollback</td></tr>
+<tr><td>Firmware</td><td>Signed updates, minimal attack surface, memory protections (ASLR, stack canaries)</td><td>Exploitation, persistence, supply chain</td></tr>
+<tr><td>Network</td><td>TLS 1.3, mutual auth, certificate pinning, segmented VLANs, zero trust</td><td>MITM, credential theft, lateral movement</td></tr>
+<tr><td>Application</td><td>Input validation, least privilege, secure defaults, privacy by design</td><td>Injection, privilege escalation, data leak</td></tr>
+<tr><td>Operations</td><td>OTA updates, monitoring, incident response, secure decommissioning</td><td>Unpatched vulns, undetected compromise, data residue</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>Secure Boot & Root of Trust</h2>
+<div class="defense">
+<h4>What it does</h4>
+<p>Ensures only manufacturer-signed firmware runs. The CPU verifies a cryptographic signature on each boot stage before executing it, starting from an immutable ROM (the Root of Trust).</p>
+</div>
+
+<p><strong>Chain of Trust:</strong></p>
+<pre><code>ROM (immutable, RoT)
+  │ verifies signature
+  ▼
+Bootloader (signed)
+  │ verifies signature
+  ▼
+Application Firmware (signed)
+  │ verifies signature (optional, for modular updates)
+  ▼
+Runtime</code></pre>
+
+<p><strong>Key properties:</strong></p>
+<ul>
+<li><strong>Immutable Root of Trust:</strong> Burned into silicon at fabrication; cannot be modified.</li>
+<li><strong>Signature verification:</strong> Uses asymmetric crypto (ECDSA P-256, Ed25519, or RSA-2048+). Public key in ROM/OTP; private key held only by manufacturer.</li>
+<li><strong>Rollback protection:</strong> Monotonic counter or version check prevents downgrading to vulnerable firmware.</li>
+<li><strong>Measured boot (optional):</strong> Hashes each stage into TPM/secure element for remote attestation.</li>
+</ul>
+
+<p><strong>Common mistakes:</strong> Using symmetric keys for boot verification (extractable), skipping rollback protection, allowing "recovery mode" that bypasses verification.</p>
+</section>
+
+<section class="card">
+<h2>Secure OTA (Over-the-Air) Updates</h2>
+<div class="defense">
+<h4>Requirements for a trustworthy update system</h4>
+</div>
+
+<ol>
+<li><strong>Authenticity:</strong> Firmware image signed by manufacturer's private key; device verifies with embedded public key.</li>
+<li><strong>Integrity:</strong> Cryptographic hash (SHA-256+) matches signed manifest.</li>
+<li><strong>Confidentiality (optional):</strong> Encrypted payload prevents IP extraction and targeted exploit development.</li>
+<li><strong>Atomicity:</strong> A/B partitioning or dual-bank flash—update writes to inactive bank, verifies, then swaps. Power loss = clean rollback.</li>
+<li><strong>Rollback protection:</strong> Version monotonic counter in secure storage; reject older versions.</li>
+<li><strong>Revocation:</strong> Compromised signing keys can be revoked via certificate transparency or CRL delivered out-of-band.</li>
+<li><strong>Differential updates:</strong> Delta compression reduces bandwidth; critical for cellular/LPWAN devices.</li>
+</ol>
+
+<p><strong>Update flow:</strong></p>
+<pre><code>Device ←── HTTPS/TLS 1.3 + mutual auth ──→ Update Server
+   │
+   ├── Verify server cert (pinning)
+   ├── Download manifest (version, hash, signature, URL)
+   ├── Verify manifest signature
+   ├── Download firmware image (streaming, verify hash incrementally)
+   ├── Write to inactive partition
+   ├── Verify full image hash
+   ├── Mark partition active (atomic swap)
+   └── Reboot into new firmware</code></pre>
+
+<p><strong>Real-world failure:</strong> The 2021 <em>SolarWinds</em> supply chain attack showed that even signed updates can be malicious if the build system is compromised <a href="#ref-solarwinds">[3]</a>. <strong>Reproducible builds</strong> and <strong>binary transparency logs</strong> mitigate this.</p>
+</section>
+
+<section class="card">
+<h2>Network Segmentation & Zero Trust</h2>
+<div class="defense">
+<h4>Never trust the local network</h4>
+<p>IoT devices should not assume LAN peers are trustworthy. Apply zero-trust principles:</p>
+</div>
+
+<ul>
+<li><strong>Mutual TLS (mTLS):</strong> Both device and server authenticate via certificates. Device cert provisioned at manufacturing (ideally in secure element).</li>
+<li><strong>Certificate pinning:</strong> Device stores hash of expected server CA/public key; rejects MITM even with valid CA.</li>
+<li><strong>Network segmentation:</strong> IoT devices on dedicated VLAN with no access to IT/OT networks. East-west traffic blocked by default.</li>
+<li><strong>Minimal exposure:</strong> No inbound ports. All communication outbound-initiated (device → cloud) or via authenticated tunnel (MQTT over TLS, CoAP over DTLS, WebSocket over TLS).</li>
+<li><strong>Protocol choice:</strong> Prefer MQTT 5.0 + TLS, CoAP + OSCORE, or Matter/Thread over proprietary cleartext protocols.</li>
+</ul>
+
+<p><strong>Example: Secure MQTT configuration</strong></p>
+<pre><code># Device config (pseudocode)
+mqtt:
+  broker: "mqtts://iot.example.com:8883"  # Port 8883 (unit: port number)
+  client_id: "device-{serial}-{secure_element_id}"
+  tls:
+    ca_cert: "/certs/ca.pem"           # Pinned CA
+    client_cert: "/certs/device.pem"   # Unique per device
+    client_key: "/secure_element/slot0" # Private key never leaves SE
+    verify_hostname: true
+  keepalive: 60  # Unit: seconds
+  clean_session: false</code></pre>
+</section>
+
+<section class="card">
+<h2>Secure Development Practices</h2>
+<div class="defense">
+<h4>Shift left: security during development, not after</h4>
+</div>
+
+<table>
+<thead>
+<tr><th>Practice</th><th>Tooling / Approach</th></tr>
+</thead>
+<tbody>
+<tr><td>Threat modeling</td><td>STRIDE for IoT (Microsoft), attack trees; do it at design phase</td></tr>
+<tr><td>Static analysis</td><td>Cppcheck, Clang Static Analyzer, CodeQL, Coverity; run in CI</td></tr>
+<tr><td>Dependency scanning</td><td>SBOM (CycloneDX/SPDX), Dependabot, Trivy, Syft; monitor CVEs in RTOS, libc, crypto libs</td></tr>
+<tr><td>Fuzzing</td><td>AFL++, libFuzzer on protocol parsers; critical for network-facing code</td></tr>
+<tr><td>Hardening flags</td><td>-fstack-protector-strong, -D_FORTIFY_SOURCE=2, -pie, -fstack-clash-protection, RELRO</td></tr>
+<tr><td>Memory safety</td><td>Consider Rust for new components; if C/C++, use MISRA C, CERT C coding standards</td></tr>
+<tr><td>Secure defaults</td><td>Disable debug, require password change on first boot, minimal services</td></tr>
+<tr><td>Privacy by design</td><td>Data minimization, local processing, user consent, encryption at rest</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>Provisioning & Device Identity</h2>
+<p>Each device needs a unique, unforgeable identity established at manufacturing:</p>
+
+<ul>
+<li><strong>Secure element / TPM / PUF:</strong> Hardware-protected key storage. Private key never leaves the chip.</li>
+<li><strong>Certificate injection:</strong> During manufacturing, each device gets a unique X.509 cert signed by manufacturer CA (IDEVID per IEEE 802.1AR) <a href="#ref-ieee-802-1ar">[2]</a>.</li>
+<li><strong>Zero-touch provisioning:</strong> Device presents IDEVID to cloud onboarding service; cloud issues operational cert (LDEVID) for daily use.</li>
+<li><strong>Key rotation:</strong> Operational certs short-lived (90 days, unit: days); renewed automatically via EST (Enrollment over Secure Transport, RFC 7030) <a href="#ref-rfc7030">[1]</a>.</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>Socratic Check</h2>
+<div class="socratic" data-question="sec-1">
+<p>Why is A/B partitioning (dual-bank flash) important for OTA updates? What happens if you don't have it and power fails mid-update?</p>
+</div>
+
+<div class="socratic" data-question="sec-2">
+<p>A team wants to skip mutual TLS because "our devices are on a private VLAN." Name three reasons this is dangerous even in a segmented network.</p>
+</div>
+
+<div class="socratic" data-question="sec-3">
+<p>You're reviewing a firmware PR that adds a new HTTP API endpoint. What are the first five security questions you should ask?</p>
+</div>
+</section>
+
+<section class="card">
+<h2>Key Takeaways</h2>
+<ul>
+<li><strong>Secure boot</strong> is the foundation—without it, an attacker with physical access can replace firmware entirely.</li>
+<li><strong>OTA updates</strong> must be signed, atomic, and rollback-protected. They are your only path to fixing vulnerabilities after deployment.</li>
+<li><strong>Network segmentation + mTLS</strong> assumes breach: limit blast radius, authenticate every connection.</li>
+<li><strong>Unique device identities</strong> (IDEVID/LDEVID) enable revocation, audit, and per-device policy—shared keys are a single point of failure.</li>
+<li><strong>Shift left:</strong> Threat modeling, static analysis, fuzzing, and dependency scanning catch bugs before they ship.</li>
+</ul>
+</section>
+</main>
+
+<footer>
+<p>Part of the OSU IoT Security Workshop. <a href="index.html">← Back to Home</a> | <a href="lesson1.html">← Lesson 1</a></p>
+</footer>
+
+<section class="card" id="references">
+<h2>References</h2>
+<ol>
+<li id="ref-rfc7030">Pritikin, M., Yee, P., Harkins, D. "RFC 7030: Enrollment over Secure Transport." <em>IETF</em>, October 2013. <a href="https://www.rfc-editor.org/info/rfc7030" target="_blank">https://www.rfc-editor.org/info/rfc7030</a></li>
+<li id="ref-ieee-802-1ar">IEEE Standards Association. "IEEE 802.1AR: Secure Device Identity." <a href="https://1.ieee802.org/security/802-1ar/" target="_blank">https://1.ieee802.org/security/802-1ar/</a></li>
+<li id="ref-solarwinds">Microsoft Security. "SolarWinds supply chain attack analysis." <a href="https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/" target="_blank">https://www.microsoft.com/security/blog/2021/01/20/deep-dive-into-the-solorigate-second-stage-activation-from-sunburst-to-teardrop-and-raindrop/</a></li>
+<li id="ref-iot-analytics-2025">IoT Analytics. "State of IoT 2025: Number of connected IoT devices growing 14% to 21.1 billion globally." October 28, 2025. <a href="https://iot-analytics.com/number-connected-iot-devices/" target="_blank">https://iot-analytics.com/number-connected-iot-devices/</a></li>
+</ol>
+</section>
+<script src="socratic.js" defer></script>
+</body>
+</html>

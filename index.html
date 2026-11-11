@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IoT Cybersecurity Fundamentals</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+h1 { color: #1a3c5e; }
+h2 { color: #2c5f7c; margin-top: 2rem; }
+nav { margin: 2rem 0; padding: 1rem; background: #f0f5f8; border-radius: 8px; }
+nav a { display: inline-block; margin-right: 1rem; padding: 0.5rem 1rem; background: #1a3c5e; color: white; text-decoration: none; border-radius: 4px; }
+nav a:hover { background: #2c5f7c; }
+.card { border: 1px solid #d0d8e0; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+.card h3 { margin-top: 0; color: #1a3c5e; }
+.socratic { background: #fff8e8; border-left: 4px solid #e8a838; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+.socratic p { margin: 0; font-weight: 500; }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #d0d8e0; color: #666; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<header>
+<h1>IoT Cybersecurity Fundamentals</h1>
+<p>A practical introduction for first-year software developers</p>
+</header>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="lesson1.html">Lesson 1: Common Vulnerabilities</a>
+<a href="lesson2.html">Lesson 2: Securing Devices</a>
+<a href="quiz.html">Quiz</a>
+</nav>
+
+<main>
+<section class="card">
+<h2>Why IoT Security Matters</h2>
+<p>The Internet of Things (IoT) connects billions of devices (count, no unit)—smart thermostats, industrial sensors, medical devices, vehicles—to the internet <a href="#ref-iot-analytics-2025">[1]</a>. Each connection is a potential entry point for attackers.</p>
+<p>As software developers, you will build, integrate, or maintain systems that interact with IoT devices. Understanding the unique security challenges of these devices is essential, even if you don't work on embedded firmware directly.</p>
+</section>
+
+<section class="card">
+<h2>What Makes IoT Different</h2>
+<ul>
+<li><strong>Resource constraints:</strong> Limited CPU, memory, and power make traditional security (TLS, heavy crypto) difficult.</li>
+<li><strong>Long lifecycles:</strong> Devices may operate for 10+ years (unit: years) without updates.</li>
+<li><strong>Physical exposure:</strong> Attackers often have physical access to devices.</li>
+<li><strong>Heterogeneous ecosystems:</strong> Multiple vendors, protocols, and update mechanisms.</li>
+<li><strong>Scale:</strong> A single vulnerability can affect millions of devices (count, no unit) simultaneously.</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>Learning Path</h2>
+<div class="socratic" data-question="iot-1">
+<p>What do you think is the biggest difference between securing a web server and securing an IoT sensor deployed in a remote field?</p>
+</div>
+<p><strong>Lesson 1:</strong> <a href="lesson1.html">Common IoT Vulnerabilities</a> — Explore the OWASP IoT Top 10 and real-world examples.</p>
+<p><strong>Lesson 2:</strong> <a href="lesson2.html">Securing IoT Devices</a> — Defense strategies: secure boot, OTA updates, network segmentation, and secure development practices.</p>
+</section>
+</main>
+
+<footer>
+<p>Part of the OSU IoT Security Workshop. Live at <a href="https://humble-broccoli-x5v67pwwrpqv364pp-8000.app.github.dev/">https://humble-broccoli-x5v67pwwrpqv364pp-8000.app.github.dev/</a></p>
+</footer>
+
+<section class="card" id="references">
+<h2>References</h2>
+<ol>
+<li id="ref-iot-analytics-2025">IoT Analytics. "State of IoT 2025: Number of connected IoT devices growing 14% to 21.1 billion globally." October 28, 2025. <a href="https://iot-analytics.com/number-connected-iot-devices/" target="_blank">https://iot-analytics.com/number-connected-iot-devices/</a></li>
+<li id="ref-owasp-iot">OWASP Internet of Things Project. "Active OWASP Internet of Things projects: OWASP IoT Top 10." <a href="https://github.com/OWASP/www-project-internet-of-things/blob/master/info.md" target="_blank">https://github.com/OWASP/www-project-internet-of-things/blob/master/info.md</a></li>
+</ol>
+</section>
+<script src="socratic.js" defer></script>
+</body>
+</html>

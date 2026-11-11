@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1: Common IoT Vulnerabilities | IoT Cybersecurity Fundamentals</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+h1 { color: #1a3c5e; }
+h2 { color: #2c5f7c; margin-top: 2rem; }
+nav { margin: 2rem 0; padding: 1rem; background: #f0f5f8; border-radius: 8px; }
+nav a { display: inline-block; margin-right: 1rem; padding: 0.5rem 1rem; background: #1a3c5e; color: white; text-decoration: none; border-radius: 4px; }
+nav a:hover { background: #2c5f7c; }
+.card { border: 1px solid #d0d8e0; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+.card h3 { margin-top: 0; color: #1a3c5e; }
+.socratic { background: #fff8e8; border-left: 4px solid #e8a838; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+.socratic p { margin: 0; font-weight: 500; }
+.vuln { background: #fdf2f2; border-left: 4px solid #c0392b; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; }
+.vuln h4 { margin-top: 0; color: #c0392b; }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #d0d8e0; color: #666; font-size: 0.9rem; }
+code { background: #f0f5f8; padding: 0.2rem 0.4rem; border-radius: 4px; }
+pre { background: #1e2a38; color: #d0d8e0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+</style>
+</head>
+<body>
+<header>
+<h1>Lesson 1: Common IoT Vulnerabilities</h1>
+<p>Understanding the OWASP IoT Top 10 and real-world attack patterns</p>
+</header>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="lesson1.html">Lesson 1: Common Vulnerabilities</a>
+<a href="lesson2.html">Lesson 2: Securing Devices</a>
+<a href="quiz.html">Quiz</a>
+</nav>
+
+<main>
+<section class="card">
+<h2>The OWASP IoT Top 10</h2>
+<p>The Open Web Application Security Project (OWASP) maintains a specific Top 10 for IoT, reflecting the unique threat landscape of connected devices <a href="#ref-owasp-iot">[1]</a>. Unlike the web application Top 10, these vulnerabilities often stem from hardware, firmware, and deployment choices.</p>
+
+<div class="vuln">
+<h4>1. Weak, Guessable, or Hardcoded Passwords</h4>
+<p>Many IoT devices ship with default credentials (<code>admin/admin</code>, <code>root/root</code>) or hardcoded backdoor accounts that cannot be changed. The Mirai botnet (2016) exploited exactly this—scanning for Telnet/SSH with factory defaults and enrolling hundreds of thousands of cameras and routers (count, no unit) into a DDoS army <a href="#ref-mirai-wiki">[2]</a>.</p>
+</div>
+
+<div class="vuln">
+<h4>2. Insecure Network Services</h4>
+<p>Unnecessary services (Telnet, FTP, HTTP, UPnP) exposed on the network. Developers often leave debug interfaces enabled in production firmware.</p>
+</div>
+
+<div class="vuln">
+<h4>3. Insecure Ecosystem Interfaces</h4>
+<p>Cloud APIs, mobile apps, and web portals that communicate with the device often lack authentication, rate limiting, or encryption. A compromised app can mean a compromised device fleet.</p>
+</div>
+
+<div class="vuln">
+<h4>4. Lack of Secure Update Mechanism</h4>
+<p>No OTA (over-the-air) updates, unsigned firmware, no rollback protection, or updates delivered over HTTP. Devices become permanently vulnerable once a flaw is discovered.</p>
+</div>
+
+<div class="vuln">
+<h4>5. Use of Insecure or Outdated Components</h4>
+<p>Third-party libraries (OpenSSL, BusyBox, kernel) with known CVEs. Supply chain attacks on build systems.</p>
+</div>
+
+<div class="vuln">
+<h4>6. Insufficient Privacy Protection</h4>
+<p>Personal data (audio, video, location, health) collected without consent, stored unencrypted, or transmitted in cleartext.</p>
+</div>
+
+<div class="vuln">
+<h4>7. Insecure Data Transfer and Storage</h4>
+<p>No TLS, custom "encryption," keys stored in flash readable via JTAG/UART, or cloud databases with open permissions.</p>
+</div>
+
+<div class="vuln">
+<h4>8. Lack of Device Management</h4>
+<p>No asset inventory, no monitoring, no secure decommissioning. Orphaned devices on the network become footholds.</p>
+</div>
+
+<div class="vuln">
+<h4>9. Insecure Default Settings</h4>
+<p>Open Wi-Fi hotspots, enabled debug ports, unnecessary services on by default. "Secure by default" is rare in IoT.</p>
+</div>
+
+<div class="vuln">
+<h4>10. Lack of Physical Hardening</h4>
+<p>Exposed UART/JTAG/SWD, unencrypted flash, no tamper detection. Physical access = full compromise in many cases.</p>
+</div>
+</section>
+
+<section class="card">
+<h2>Case Study: The Mirai Botnet (2016)</h2>
+<p>Mirai scanned the internet for IoT devices with open Telnet (port 23, unit: port number) or SSH (port 22, unit: port number), then tried a list of ~60 (count, no unit) default username/password pairs <a href="#ref-mirai-wiki">[2]</a>. It infected ~600,000 devices (count, no unit)—mostly IP cameras and home routers—and launched record-breaking DDoS attacks (1.1 Tbps (unit: terabits per second) against OVH, 620 Gbps (unit: gigabits per second) against Krebs on Security) <a href="#ref-mirai-wiki">[2]</a>.</p>
+
+<p><strong>Root cause:</strong> Hardcoded credentials + unnecessary remote access services exposed to the internet.</p>
+
+<p><strong>Lesson:</strong> A device that doesn't need remote shell access shouldn't have it. A device that does need it must enforce unique, strong credentials on first boot.</p>
+</section>
+
+<section class="card">
+<h2>Case Study: Smart Lock Vulnerability (2017)</h2>
+<p>A popular smart lock used a static AES key hardcoded in the mobile app to encrypt Bluetooth commands. Researchers extracted the key from the APK, then replayed "unlock" commands to any lock of that model <a href="#ref-smart-lock">[3]</a>.</p>
+
+<p><strong>Root cause:</strong> Symmetric key embedded in client-side code + no device-specific key derivation + no replay protection.</p>
+
+<p><strong>Lesson:</strong> Never put secrets in client-distributed code. Use asymmetric crypto or per-device keys derived from a secure element.</p>
+</section>
+
+<section class="card">
+<h2>Socratic Check</h2>
+<div class="socratic" data-question="vuln-1">
+<p>Why did Mirai spread so fast compared to traditional malware? What properties of IoT devices made this possible?</p>
+</div>
+
+<div class="socratic" data-question="vuln-2">
+<p>A developer says: "We'll just use HTTPS for our device API, that solves the encryption problem." What are three reasons this might still be insufficient for an IoT device?</p>
+</div>
+</section>
+
+<section class="card">
+<h2>Key Takeaways</h2>
+<ul>
+<li>IoT vulnerabilities often exist at the intersection of hardware, firmware, network, and cloud.</li>
+<li>Default credentials and unnecessary exposed services remain the #1 real-world exploit vector.</li>
+<li>Secure update mechanisms are not optional—they are the only way to remediate vulnerabilities post-deployment.</li>
+<li>Physical access changes the threat model entirely: assume the attacker has the device in hand.</li>
+</ul>
+</section>
+</main>
+
+<footer>
+<p>Part of the OSU IoT Security Workshop. <a href="index.html">← Back to Home</a> | <a href="lesson2.html">Next: Lesson 2 →</a></p>
+</footer>
+
+<section class="card" id="references">
+<h2>References</h2>
+<ol>
+<li id="ref-owasp-iot">OWASP Internet of Things Project. "Active OWASP Internet of Things projects: OWASP IoT Top 10." <a href="https://github.com/OWASP/www-project-internet-of-things/blob/master/info.md" target="_blank">https://github.com/OWASP/www-project-internet-of-things/blob/master/info.md</a></li>
+<li id="ref-mirai-wiki">Wikipedia contributors. "Mirai (malware)." <em>Wikipedia, The Free Encyclopedia</em>. <a href="https://en.wikipedia.org/wiki/Mirai_(malware)" target="_blank">https://en.wikipedia.org/wiki/Mirai_(malware)</a></li>
+<li id="ref-smart-lock">Anthony Rose and Ben Ramsey. "When IoT Attacks: Understanding and Exploiting Smart Lock Vulnerabilities." <em>WOOT 2016</em>. <a href="https://www.usenix.org/system/files/conference/woot16/woot16_paper_rose.pdf" target="_blank">https://www.usenix.org/system/files/conference/woot16/woot16_paper_rose.pdf</a></li>
+</ol>
+</section>
+<script src="socratic.js" defer></script>
+</body>
+</html>
