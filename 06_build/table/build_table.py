@@ -143,9 +143,23 @@ def main():
     found = sum(r.get(f"{n}_found") == "yes" for r in rows for n in fields)
     asked = sum(r.get(f"{n}_found") in ("yes", "NO") for r in rows for n in fields)
     unsupported = sum(r.get(f"{n}_found") == "UNSUPPORTED" for r in rows for n in fields)
+    not_stated = sum(r.get(f"{n}_found") == "not stated" for r in rows for n in fields)
+    not_stated_part = sum(r.get(f"{n}_found") == "not stated in the part read" for r in rows for n in fields)
     shown = out.relative_to(ROOT) if ROOT in out.parents else out
-    print(f"\n{len(rows)} rows -> {shown}/table.csv; {found} of {asked} quotes found word for word"
-          + (f"; {unsupported} value(s) with no quote at all, marked UNSUPPORTED." if unsupported else "."))
+    print(f"\n{len(rows)} rows -> {shown}/table.csv")
+    print(f"  quotes found word for word (yes): {found}")
+    print(f"  quotes checked (yes + NO): {asked}")
+    print(f"  unsupported (value given, no quote): {unsupported}")
+    print(f"  not stated: {not_stated}")
+    print(f"  not stated in part read: {not_stated_part}")
+    # Per-field breakdown
+    for n in fields:
+        f_yes = sum(r.get(f"{n}_found") == "yes" for r in rows)
+        f_no = sum(r.get(f"{n}_found") == "NO" for r in rows)
+        f_unsupp = sum(r.get(f"{n}_found") == "UNSUPPORTED" for r in rows)
+        f_ns = sum(r.get(f"{n}_found") == "not stated" for r in rows)
+        f_nsp = sum(r.get(f"{n}_found") == "not stated in the part read" for r in rows)
+        print(f"  {n}: yes={f_yes} NO={f_no} UNSUPPORTED={f_unsupp} not_stated={f_ns} not_stated_part_read={f_nsp}")
     long_ones = [r["file"] for r in rows if r.get("cut")]
     if long_ones:
         print(f"Read only in part (too long): {', '.join(long_ones)}. See the read column.")
